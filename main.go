@@ -2,28 +2,17 @@ package main
 
 import (
 	"bytes"
-	"encoding/base64"
-	"encoding/hex"
 	"flag"
 	"fmt"
 	"os"
 )
 
 var (
-	binFlag = flag.Bool("b", false, "use bits format")
-	hexFlag = flag.Bool("hex", false, "use hex format")
-	b64Flag = flag.Bool("b64", false, "use base64 format")
-	widthFlag = flag.Int("w", 6, "width")
+	binFlag      = flag.Bool("b", false, "use bits format")
+	b64Flag      = flag.Bool("b64", false, "use base64 format")
+	widthFlag    = flag.Int("w", 6, "width")
 	separateFlag = flag.Int("s", 8, "separate")
 )
-
-func init() {
-	flag.BoolVar(binFlag, "bits", false, "use bits format")
-	flag.BoolVar(hexFlag, "hexadecimal", false, "use hex format")
-	flag.BoolVar(b64Flag, "base64", false, "use base64 format")
-	flag.IntVar(widthFlag, "width", 6, "width")
-	flag.IntVar(separateFlag, "separate", 8, "separate")
-}
 
 func main() {
 	flag.Parse()
@@ -50,13 +39,11 @@ func main() {
 	var encoded string
 	switch {
 	case *binFlag:
-		for _, v := range b {
-			encoded += fmt.Sprintf("%08b", v)
-		}
+		encoded = encodeBits(b)
 	case *b64Flag:
-		encoded = base64.StdEncoding.EncodeToString(b)
+		encoded = encodeBase64(b)
 	default:
-		encoded = hex.EncodeToString(b)
+		encoded = encodeHex(b)
 	}
 
 	var s string
@@ -64,7 +51,7 @@ func main() {
 		s += string(v)
 		if (i+1)%(*widthFlag**separateFlag) == 0 {
 			s += "\n"
-		} else if (i+1) % *separateFlag == 0 {
+		} else if (i+1)%*separateFlag == 0 {
 			s += " "
 		}
 	}
