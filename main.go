@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -17,33 +18,34 @@ var (
 func main() {
 	flag.Parse()
 	args := flag.Args()
-	if len(args) != 1 {
-		fmt.Println("required filename")
-		os.Exit(1)
-	}
 
-	f, err := os.Open(flag.Args()[0])
-	if err != nil {
-		fmt.Printf("failed to open file: %v", err)
-		os.Exit(1)
+	var r io.Reader
+	if len(args) == 1 {
+		f, err := os.Open(flag.Args()[0])
+		if err != nil {
+			fmt.Printf("failed to open file: %v", err)
+			os.Exit(1)
+		}
+		defer f.Close()
+		r = f
+	} else {
+		r = os.Stdin
 	}
-	defer f.Close()
 
 	var buf bytes.Buffer
-	if _, err := buf.ReadFrom(f); err != nil {
-		fmt.Printf("failed to read file: %v", err)
+	if _, err := buf.ReadFrom(r); err != nil {
+		fmt.Printf("failed to read input: %v", err)
 		os.Exit(1)
 	}
-	b := buf.Bytes()
 
 	var encoded string
 	switch {
 	case *binFlag:
-		encoded = encodeBits(b)
+		encoded = encodeBits(buf.Bytes())
 	case *b64Flag:
-		encoded = encodeBase64(b)
+		encoded = encodeBase64(buf.Bytes())
 	default:
-		encoded = encodeHex(b)
+		encoded = encodeHex(buf.Bytes())
 	}
 
 	var s string
