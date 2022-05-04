@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -9,10 +8,10 @@ import (
 )
 
 var (
-	binFlag      = flag.Bool("b", false, "use bits format")
-	b64Flag      = flag.Bool("b64", false, "use base64 format")
-	widthFlag    = flag.Int("w", 6, "width")
-	separateFlag = flag.Int("s", 8, "separate")
+	binFlag   = flag.Bool("bit", false, "use bit format")
+	b64Flag   = flag.Bool("base64", false, "use base64 format")
+	hexFlag   = flag.Bool("hex", false, "use hex format")
+	widthFlag = flag.Int("w", 6, "width")
 )
 
 func main() {
@@ -32,30 +31,38 @@ func main() {
 		r = os.Stdin
 	}
 
-	var buf bytes.Buffer
-	if _, err := buf.ReadFrom(r); err != nil {
+	in, err := io.ReadAll(r)
+	if err != nil {
 		fmt.Printf("failed to read input: %v", err)
 		os.Exit(1)
 	}
 
-	var encoded string
+	var viewer *BinaryViewer
 	switch {
 	case *binFlag:
-		encoded = encodeBits(buf.Bytes())
+		buf := make([]byte, 0, ViewerCap(len(in), PadSizeBit))
+		viewer = NewBinaryViewer(buf, PadSizeBit, *widthFlag, DefaultPadChar)
+		if _, err := viewer.Write(encodeBits(in)); err != nil {
+			fmt.Printf("failed to write bits to binary viewer: %v", err)
+			os.Exit(1)
+		}
 	case *b64Flag:
-		encoded = encodeBase64(buf.Bytes())
+		buf := make([]byte, 0, ViewerCap(len(in), PadSizeBase64))
+		viewer = NewBinaryViewer(buf, PadSizeBase64, *widthFlag, DefaultPadChar)
+		if _, err := viewer.Write(encodeBase64(in)); err != nil {
+			fmt.Printf("failet to write base64 to binary viewer: %v", err)
+			os.Exit(1)
+		}
+	case *hexFlag:
+		fallthrough
 	default:
-		encoded = encodeHex(buf.Bytes())
-	}
-
-	var s string
-	for i, v := range encoded {
-		s += string(v)
-		if (i+1)%(*widthFlag**separateFlag) == 0 {
-			s += "\n"
-		} else if (i+1)%*separateFlag == 0 {
-			s += " "
+		buf := make([]byte, 0, ViewerCap(len(in), PadSizeHex))
+		viewer = NewBinaryViewer(buf, PadSizeHex, *widthFlag, DefaultPadChar)
+		if _, err := viewer.Write(encodeHex(in)); err != nil {
+			fmt.Printf("failet to write hex to binary viewer: %v", err)
+			os.Exit(1)
 		}
 	}
-	fmt.Println(s)
+
+	io.Copy(os.Stdout, viewer)
 }
