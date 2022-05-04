@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io"
@@ -49,7 +51,9 @@ func main() {
 		}
 	case *b64Flag:
 		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenBase64, *widthFlag, goblet.DefaultPadChar)
-		if _, err := viewer.Write(goblet.EncodeBase64(in)); err != nil {
+		enc := base64.NewEncoder(base64.StdEncoding, viewer)
+		defer enc.Close()
+		if _, err := enc.Write(in); err != nil {
 			fmt.Printf("failet to write base64 to binary viewer: %v", err)
 			os.Exit(1)
 		}
@@ -57,7 +61,8 @@ func main() {
 		fallthrough
 	default:
 		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenHex, *widthFlag, goblet.DefaultPadChar)
-		if _, err := viewer.Write(goblet.EncodeHex(in)); err != nil {
+		enc := hex.NewEncoder(viewer)
+		if _, err := enc.Write(in); err != nil {
 			fmt.Printf("failet to write hex to binary viewer: %v", err)
 			os.Exit(1)
 		}

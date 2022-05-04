@@ -2,8 +2,6 @@ package goblet
 
 import (
 	"bytes"
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"strings"
 )
@@ -88,16 +86,4 @@ func EncodeBit(src []byte) []byte {
 		s.WriteString(fmt.Sprintf("%08b", b))
 	}
 	return []byte(s.String())
-}
-
-func EncodeHex(src []byte) []byte {
-	dst := make([]byte, hex.EncodedLen(len(src)))
-	hex.Encode(dst, src)
-	return dst
-}
-
-func EncodeBase64(src []byte) []byte {
-	dst := make([]byte, base64.StdEncoding.EncodedLen(len(src)))
-	base64.StdEncoding.Encode(dst, src)
-	return dst
 }
