@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/convto/bit"
 	"github.com/convto/goblet"
 )
 
@@ -45,7 +46,7 @@ func main() {
 	switch {
 	case *binFlag:
 		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenBit, *widthFlag, goblet.DefaultPadChar)
-		if _, err := viewer.Write(goblet.EncodeBit(in)); err != nil {
+		if _, err := bit.NewEncoder(viewer).Write(in); err != nil {
 			fmt.Printf("failed to write bits to binary viewer: %v", err)
 			os.Exit(1)
 		}
@@ -61,8 +62,7 @@ func main() {
 		fallthrough
 	default:
 		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenHex, *widthFlag, goblet.DefaultPadChar)
-		enc := hex.NewEncoder(viewer)
-		if _, err := enc.Write(in); err != nil {
+		if _, err := hex.NewEncoder(viewer).Write(in); err != nil {
 			fmt.Printf("failet to write hex to binary viewer: %v", err)
 			os.Exit(1)
 		}

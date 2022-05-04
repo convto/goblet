@@ -2,8 +2,6 @@ package goblet
 
 import (
 	"bytes"
-	"fmt"
-	"strings"
 )
 
 const (
@@ -77,13 +75,4 @@ func (v *BinaryViewer) writeByte(b byte) (n int) {
 // withoutBlankLen returns the length excluding blank chars for the calculation of line break position
 func (v *BinaryViewer) withoutBlankLen() int {
 	return v.Buffer.Len() - (v.Buffer.Len() / 9)
-}
-
-func EncodeBit(src []byte) []byte {
-	var s strings.Builder
-	for _, b := range src {
-		// strings#Builder.WriterString() always returns nil error
-		s.WriteString(fmt.Sprintf("%08b", b))
-	}
-	return []byte(s.String())
 }
