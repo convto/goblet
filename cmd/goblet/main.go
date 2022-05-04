@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/convto/goblet"
 )
 
 var (
@@ -37,28 +39,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	var viewer *BinaryViewer
+	var viewer *goblet.BinaryViewer
 	switch {
 	case *binFlag:
-		buf := make([]byte, 0, ViewerCap(len(in), PadSizeBit))
-		viewer = NewBinaryViewer(buf, PadSizeBit, *widthFlag, DefaultPadChar)
-		if _, err := viewer.Write(encodeBits(in)); err != nil {
+		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenBit, *widthFlag, goblet.DefaultPadChar)
+		if _, err := viewer.Write(goblet.EncodeBit(in)); err != nil {
 			fmt.Printf("failed to write bits to binary viewer: %v", err)
 			os.Exit(1)
 		}
 	case *b64Flag:
-		buf := make([]byte, 0, ViewerCap(len(in), PadSizeBase64))
-		viewer = NewBinaryViewer(buf, PadSizeBase64, *widthFlag, DefaultPadChar)
-		if _, err := viewer.Write(encodeBase64(in)); err != nil {
+		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenBase64, *widthFlag, goblet.DefaultPadChar)
+		if _, err := viewer.Write(goblet.EncodeBase64(in)); err != nil {
 			fmt.Printf("failet to write base64 to binary viewer: %v", err)
 			os.Exit(1)
 		}
 	case *hexFlag:
 		fallthrough
 	default:
-		buf := make([]byte, 0, ViewerCap(len(in), PadSizeHex))
-		viewer = NewBinaryViewer(buf, PadSizeHex, *widthFlag, DefaultPadChar)
-		if _, err := viewer.Write(encodeHex(in)); err != nil {
+		viewer = goblet.NewBinaryViewer(len(in), goblet.CharLenHex, *widthFlag, goblet.DefaultPadChar)
+		if _, err := viewer.Write(goblet.EncodeHex(in)); err != nil {
 			fmt.Printf("failet to write hex to binary viewer: %v", err)
 			os.Exit(1)
 		}
