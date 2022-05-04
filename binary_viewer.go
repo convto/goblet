@@ -16,15 +16,16 @@ const (
 	CharLenBase64    = 6
 )
 
-// BinaryViewer provides I/O for viewing text-encoded binaries
+// BinaryViewer provides I/O for viewing text-encoded binaries,
+// write encoded binaries, you can read the formatted contents
 type BinaryViewer struct {
 	*bytes.Buffer
 	lineBytes int  // used to determine line breaks when writing
-	charLen   int  // number of bits per character encoded
+	charLen   int  // number of bits per encoded character
 	padChar   byte // supports only one ascii char
 }
 
-// viewerCap returns cap of bytes required by BinaryViewer
+// viewerCap returns a convenient cap to BinaryViewer
 func viewerCap(n, pad int) int {
 	padded := n + n*pad
 	return padded + padded/8 // to insert a blank character every 8 bytes
