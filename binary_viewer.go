@@ -48,9 +48,10 @@ func NewBinaryViewer(srcLen, charLen, byteWidth int, padChar byte) *BinaryViewer
 
 func (v *BinaryViewer) Write(p []byte) (n int, err error) {
 	for _, b := range p {
-		n += v.writeByte(b)
+		v.writeByte(b)
+		n++
 		for i := 1; i < v.charLen; i++ {
-			n += v.writeByte(v.padChar)
+			v.writeByte(v.padChar)
 		}
 	}
 	return n, nil
@@ -58,18 +59,14 @@ func (v *BinaryViewer) Write(p []byte) (n int, err error) {
 
 // writeByte writes one or two bytes to buffer,
 // taking into account that a blank character is inserted every 8 bytes for formatting
-func (v *BinaryViewer) writeByte(b byte) (n int) {
+func (v *BinaryViewer) writeByte(b byte) {
 	// bytes#Buffer.WriteByte() always returns nil error
 	v.Buffer.WriteByte(b)
-	n++
 	if v.withoutBlankLen()%(v.lineBytes*8) == 0 {
 		v.Buffer.WriteByte('\n')
-		n++
 	} else if v.withoutBlankLen()%8 == 0 {
 		v.Buffer.WriteByte(' ')
-		n++
 	}
-	return n
 }
 
 // withoutBlankLen returns the length excluding blank chars for the calculation of line break position
